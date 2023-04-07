@@ -6,6 +6,8 @@ from rich.console import Console
 from tabulate import tabulate
 import os
 import time
+import pyotp
+import re
 
 console = Console()
 
@@ -24,6 +26,7 @@ def PasswordGen():
     length = int(input('Length of password -> '))
 
     rand_pass = ''.join(random.choice(rand_pass_gen) for i in range(length))
+    
     return rand_pass
 
 
@@ -35,7 +38,7 @@ cursor = conn.cursor()
 def CreateDatabase():
     cursor.execute("""
     CREATE TABLE passwords (
-        id INTERGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY,
         item VARCHAR(100),
         pass VARCHAR(100)
     )
@@ -117,6 +120,24 @@ def ShowPassSpecific():
 
     return ""
 
+def PassStrength():
+    password = console.input("[bold cyan]Password -> [/bold cyan]")
+
+    if len(password) < 8:
+        return "Password Is Short"
+    elif not re.search("[a-z]", password):
+        return "Password should have atleast one lowercase letter"
+    elif not re.search("[A-Z]", password):
+        return "Password should have atleast one uppercase letter"
+    elif not re.search("[0-9]", password):
+        return "Password should have atleast one digit"
+    elif not re.search("[!@#$%^&*()_+=-]", password):
+        return "Password should have atleast one special character"
+    else:
+        console.print('Password is strong')
+
+    return ""
+
 # calling the functions via user input
 
 help = """
@@ -127,6 +148,7 @@ help = """
 [bold cyan]pass-add[/bold cyan] [blink]>>>[/blink] [dim red]adds a password to the password database[/dim red]
 [bold cyan]show-pass-all[/bold cyan] [blink]>>>[/blink] [dim red]shows all saved passwords in the password database[/dim red]
 [bold cyan]show-pass[/bold cyan] [blink]>>>[/blink] [dim red]shows a specific saved password in the password database[/dim red]
+[bold cyan]pass-strength[/bold cyan] [blink]>>>[/blink] [dim red]checks the strength of a password[/dim red]
 [bold cyan]cls[/bold cyan] [blink]>>>[/blink] [dim red]clears the screen[/dim red]
 [bold cyan]end[/bold cyan] [blink]>>>[/blink] [dim red]ends the script[/dim red]
 
@@ -172,6 +194,9 @@ while loop == True:
 
     elif do_something.lower() == "show-pass":
         print(ShowPassSpecific())
+
+    elif do_something.lower() == "pass-strength":
+        print(PassStrength())
 
     else:
         console.print("ERROR - MAKE SURE YOU'RE TYPING THE CORRECT COMMAND IF LOST TYPE 'HELP'", style="bold red")
